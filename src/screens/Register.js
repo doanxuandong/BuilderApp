@@ -17,7 +17,7 @@ const RegisterScreen = ({ navigation }) => {
     let errors = {};
 
     if (!firstName.trim()) {
-      errors.firstName = 'Vui lòng nhập Họ';
+      errors.firstName = 'Vui lòng nhập Họ và Tên';
     }
 
     if (!lastName.trim()) {
@@ -79,18 +79,11 @@ const RegisterScreen = ({ navigation }) => {
       <Text style={styles.title}>Tạo tài khoản mới</Text>
       <TextInput
         style={styles.input}
-        placeholder="Họ"
+        placeholder="Họ và Tên"
         value={firstName}
         onChangeText={text => setFirstName(text)}
       />
       {errors.firstName && <Text style={styles.error}>{errors.firstName}</Text>}
-      <TextInput
-        style={styles.input}
-        placeholder="Tên"
-        value={lastName}
-        onChangeText={text => setLastName(text)}
-      />
-      {errors.lastName && <Text style={styles.error}>{errors.lastName}</Text>}
       <TextInput
         style={styles.input}
         placeholder="Số điện thoại"
