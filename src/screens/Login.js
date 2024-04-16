@@ -1,20 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
-const Login = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid'
 
-  const handleLogin = () => {
+const Login = ({ navigation }) => {
+
+  useEffect(() => {
+  })
+
+
+  const [email, setEmail] = useState('0855708546');
+  const [password, setPassword] = useState('1');
+
+  const handleLogin = async () => {
     // if (email === 'example@example.com' && password === 'password') {
     //   navigation.navigate('MainScreen');
     // } else {
     //   alert('Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
     // }
-    console.log('Email:', email);
-    console.log('Password:', password);
-    navigation.navigate('HomeScreen');
+    let listAcc = []
+    let check = false;
+    let idUser
+    let doIt = await firestore()
+      .collection('Users')
+      .get()
+      .then(dt => {
+        dt.docs.map(item => {
+          console.log(item._data, 1)
+          if (item._data.phone === email) {
+            if (item._data.pass === password) {
+              check = true
+              idUser = item._data.userId;
+            }
+          }
+        })
+        if (check === true) {
+          Loging(idUser)
+        }
+        else {
+          alert('Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
+        }
+      })
+    // console.log('Email:', email);
+    // console.log('Password:', password);
   };
+
+  const Loging = async idUser => {
+    await AsyncStorage.setItem('USERID', idUser)
+    navigation.navigate('HomeScreen');
+  }
 
   const handleForgotPassword = () => {
     // Xử lý logic khi người dùng quên mật khẩu ở đây

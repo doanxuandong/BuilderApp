@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid'
 import { View, Image, Text, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
+
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 
 const RegisterScreen = ({ navigation }) => {
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -13,15 +20,26 @@ const RegisterScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
 
+  const getAcc = async () => {
+    let userId = uuid.v4();
+    let t = await firestore()
+      .collection('Users')
+      .doc(userId)
+      .set({
+        name: firstName,
+        phone: phoneNumber,
+        email: email,
+        userName: username,
+        pass: password,
+        userId: userId,
+      })
+  }
+
   const handleRegister = () => {
     let errors = {};
-
+    let check = false
     if (!firstName.trim()) {
       errors.firstName = 'Vui lòng nhập Họ và Tên';
-    }
-
-    if (!lastName.trim()) {
-      errors.lastName = 'Vui lòng nhập Tên';
     }
 
     if (!phoneNumber.trim()) {
@@ -34,20 +52,6 @@ const RegisterScreen = ({ navigation }) => {
       errors.email = 'Vui lòng nhập Email';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       errors.email = 'Email không hợp lệ';
-    }
-
-    if (!dateOfBirth.trim()) {
-      errors.dateOfBirth = 'Vui lòng nhập Năm sinh';
-    } else {
-      const currentYear = new Date().getFullYear();
-      const inputYear = parseInt(dateOfBirth);
-      if (isNaN(inputYear)) {
-        errors.dateOfBirth = 'Năm sinh không hợp lệ';
-      } else if (inputYear >= currentYear) {
-        errors.dateOfBirth = 'Năm sinh không hợp lệ';
-      } else if (currentYear - inputYear < 18) {
-        errors.dateOfBirth = 'Bạn phải trên 18 tuổi';
-      }
     }
 
     if (!username.trim()) {
@@ -65,12 +69,14 @@ const RegisterScreen = ({ navigation }) => {
     }
 
     if (Object.keys(errors).length === 0) {
+      getAcc();
       Alert.alert('Đăng ký thành công', 'Chuyển đến trang đăng nhập', [
         { text: 'OK', onPress: () => navigation.navigate('Login') }
       ]);
     } else {
       setErrors(errors);
     }
+
   };
 
   return (
@@ -98,14 +104,14 @@ const RegisterScreen = ({ navigation }) => {
         onChangeText={text => setEmail(text)}
       />
       {errors.email && <Text style={styles.error}>{errors.email}</Text>}
-      <TextInput
+      {/* <TextInput
         style={styles.input}
         placeholder="Năm sinh"
         keyboardType="numeric"
         value={dateOfBirth}
         onChangeText={text => setDateOfBirth(text)}
       />
-      {errors.dateOfBirth && <Text style={styles.error}>{errors.dateOfBirth}</Text>}
+      {errors.dateOfBirth && <Text style={styles.error}>{errors.dateOfBirth}</Text>} */}
       <TextInput
         style={styles.input}
         placeholder="Tên đăng nhập"
@@ -129,7 +135,7 @@ const RegisterScreen = ({ navigation }) => {
         onChangeText={text => setConfirmPassword(text)}
       />
       {errors.confirmPassword && <Text style={styles.error}>{errors.confirmPassword}</Text>}
-      <TouchableOpacity style={styles.button} onPress={()=>handleRegister()}>
+      <TouchableOpacity style={styles.button} onPress={() => handleRegister()}>
         <Text style={styles.buttonText}>Đăng ký</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>

@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image, FlatList } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-const MainScreen = ({navigation}) => {
+
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid'
+import Edit from './Component/ListPro/Edit';
+
+
+const MainScreen = ({ navigation }) => {
+
+  useEffect(() => {
+    getProducts();
+  }, [])
+
   const [materialName, setMaterialName] = useState('');
   const [materialSize, setMaterialSize] = useState('');
   const [materialQuantity, setMaterialQuantity] = useState('');
   const [materialPrice, setMaterialPrice] = useState('');
-  const [selectedMaterial, setSelectedMaterial] = useState(null); 
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [hasMaterials, setHasMaterials] = useState(false);
@@ -15,7 +28,7 @@ const MainScreen = ({navigation}) => {
   const [editModalVisible, setEditModalVisible] = useState(false);
 
 
-  
+
   const [materialList, setMaterialList] = useState([]);
 
   const openEditModal = () => {
@@ -29,7 +42,7 @@ const MainScreen = ({navigation}) => {
     // Đóng modal sửa khi nhấn nút "Lưu"
     closeEditModal();
   };
-  
+
   const handleAddModalSave = () => {
     // Đóng modal thêm vật liệu khi nhấn nút "Hoàn thành"
     setAddModalVisible(false);
@@ -38,7 +51,7 @@ const MainScreen = ({navigation}) => {
     setSelectedMaterial(material);
     setInfoModalVisible(true);
   };
-  
+
   const handleMaterialDelete = () => {
     // Xử lý logic xóa vật liệu
     const updatedMaterialList = materialList.filter(material => material !== selectedMaterial);
@@ -54,10 +67,29 @@ const MainScreen = ({navigation}) => {
     openEditModal(); // Mở modal sửa
     setInfoModalVisible(false); // Đóng modal hiển thị thông tin
   };
-  
-  
-  
-  const handleAddMaterial = () => {
+
+  const getProducts = async () => {
+
+    let userId = await AsyncStorage.getItem('USERID')
+    setMaterialList()
+    let temp
+    let doit = await firestore()
+      .collection('Products')
+      .where('userId', '==', userId)
+      .get()
+      .then(dt => {
+        temp = dt._docs
+      })
+    let tt = []
+    await temp.map(item => {
+      tt.push(item._data);
+    })
+    setMaterialList(tt);
+  }
+
+  const handleAddMaterial = async () => {
+    userId = await AsyncStorage.getItem('USERID');
+    let idPro = uuid.v4();
     if (editingMaterial) {
       // Xử lý logic cập nhật thông tin vật liệu
       console.log('Cập nhật thông tin vật liệu:', editingMaterial);
@@ -68,14 +100,30 @@ const MainScreen = ({navigation}) => {
       setMaterialPrice('');
       setEditingMaterial(null); // Reset vật liệu đang được chỉnh sửa
       closeEditModal(); // Đóng modal sửa
+
     } else {
       // Xử lý logic thêm vật liệu vào hệ thống
-      console.log('Thêm vật liệu mới:');
-      console.log('Tên vật liệu:', materialName);
-      console.log('Kích thước:', materialSize);
-      console.log('Số lượng:', materialQuantity);
-      console.log('Giá tiền:', materialPrice);
+      // console.log('Thêm vật liệu mới:');
+      // console.log('Tên vật liệu:', materialName);
+      // console.log('Kích thước:', materialSize);
+      // console.log('Số lượng:', materialQuantity);
+      // console.log('Giá tiền:', materialPrice);
       // Reset các trường sau khi thêm
+
+
+
+      let doit = firestore()
+        .collection('Products')
+        .doc(idPro)
+        .set({
+          proId: idPro,
+          materialName: materialName,
+          materialSize: materialSize,
+          materialQuantity: materialQuantity,
+          materialPrice: materialPrice,
+          userId: userId,
+        })
+
       setMaterialName('');
       setMaterialSize('');
       setMaterialQuantity('');
@@ -83,40 +131,64 @@ const MainScreen = ({navigation}) => {
       // Đóng cửa sổ modal sau khi hoàn thành
       setAddModalVisible(false);
       setHasMaterials(true);
-      setMaterialList([...materialList, { name: materialName, size: materialSize, quantity: materialQuantity, price: materialPrice }]);
+      // setMaterialList([...materialList, { name: materialName, size: materialSize, quantity: materialQuantity, price: materialPrice }]);
     }
   };
-  
+
+
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('HomeScreen')} >
-            <Icon name="arrow-left" size={30} color="#900" />
-        </TouchableOpacity> 
+          <Icon name="arrow-left" size={30} color="#900" />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
           <Text style={styles.headerTitle}>BuilderApp</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerIcon}>
-            <Icon name='gear' size={30} color="#900" />
-        </TouchableOpacity> 
+          <Icon name='gear' size={30} color="#900" />
+        </TouchableOpacity>
       </View>
       <View style={styles.materialList}>
         <Text style={styles.materialListTitle}>Danh sách vật liệu</Text>
-          {hasMaterials ? ( // Kiểm tra xem có vật liệu nào không
-          materialList.map((material, index) => (
-          <TouchableOpacity
-           key={index}
-           style={styles.materialItem}
-           onPress={() => handleMaterialPress(material)}
-          >
-         <Text>{material.name}</Text>
-          {/* Hiển thị các thông tin khác của vật liệu (kích thước, số lượng, giá tiền) tùy ý */}
-         </TouchableOpacity>
-          ))
-         ) : (
-         <Text>Không có vật liệu nào</Text> // Hiển thị thông báo khi không có vật liệu
-         )}
+        {/* // Kiểm tra xem có vật liệu nào không */}
+
+        {
+          materialList != null ? <FlatList
+            data={materialList}
+            renderItem={({ item, index }) => {
+              return (
+                <>
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.materialItem}
+                    // onPress={() => navigation.navigate('Edit',)}
+                  >
+                    <Text>{item.materialName}</Text>
+                    {/* Hiển thị các thông tin khác của vật liệu (kích thước, số lượng, giá tiền) tùy ý */}
+                  </TouchableOpacity>
+                </>
+              )
+            }}
+          />
+            : <>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
+                <Text
+                  style={{
+                  }}
+                >
+                  Chưa có vật liệu
+                </Text>
+              </View>
+            </>
+        }
+
       </View>
       <Modal
         animationType="slide"
@@ -200,10 +272,10 @@ const MainScreen = ({navigation}) => {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{editingMaterial ? 'Sửa thông tin vật liệu' : 'Thêm vật liệu mới'}</Text>
             <TextInput
-            style={styles.input}
-            placeholder="Tên vật liệu"
-            value={editingMaterial ? editingMaterial.name : materialName}
-            onChangeText={text => setMaterialName(text)}
+              style={styles.input}
+              placeholder="Tên vật liệu"
+              value={editingMaterial ? editingMaterial.name : materialName}
+              onChangeText={text => setMaterialName(text)}
             />
             <TextInput
               style={styles.input}
@@ -226,7 +298,10 @@ const MainScreen = ({navigation}) => {
               keyboardType="numeric"
             />
             {/* Thêm phần upload ảnh */}
-            <TouchableOpacity style={styles.addButton} onPress={handleAddMaterial}>
+            <TouchableOpacity style={styles.addButton} onPress={() => {
+              handleAddMaterial()
+              getProducts()
+            }}>
               <Text style={styles.buttonText}>{editingMaterial ? 'Lưu' : 'Hoàn thành'}</Text>
             </TouchableOpacity>
           </View>
@@ -278,7 +353,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
-    
+
   },
   input: {
     width: '80%',

@@ -10,6 +10,7 @@ import UserScreen from "../UserScreen";
 import BookScreen from "../BookScreen";
 import AddPostScreen from "../AddPostScreen";
 import BrickCalculator from "../BrickCalculator";
+import Edit from "../Component/ListPro/Edit";
 const Stack = createStackNavigator();
 
 
@@ -25,6 +26,11 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name="Login"
                     component={props => <Login {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="Edit"
+                    component={props => <Edit {...props} />}
                     options={{ headerShown: false }}
                 />
                 <Stack.Screen
