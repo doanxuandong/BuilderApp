@@ -12,4 +12,4 @@ import { name as appName } from './app.json';
 import Edit from './src/screens/Component/ListPro/Edit';
 LogBox.ignoreAllLogs();
 
-AppRegistry.registerComponent(appName, () => AppNavigator);
+AppRegistry.registerComponent(appName, () => Edit);
