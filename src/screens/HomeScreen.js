@@ -8,13 +8,18 @@ import storage from '@react-native-firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid'
 import GetName from './Component/Home/GetName';
-
+let userId = ''
 const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     GetPost()
+    getUserId()
   }, [])
 
   const [list, setList] = useState()
+
+  const getUserId = async () => {
+    userId = await AsyncStorage.getItem('USERID')
+  }
 
   const GetPost = async () => {
     firestore()
@@ -60,7 +65,7 @@ const HomeScreen = ({ navigation }) => {
   const handleShowSel = (index) => {
     setSelectTab(index);
   }
-
+  // console.log(userId);
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -88,7 +93,6 @@ const HomeScreen = ({ navigation }) => {
                 <View style={styles.feedItem}>
                   <View
                     style={{
-                      borderWidth: 1,
                       flexDirection: 'row'
                     }}
                   >
@@ -99,31 +103,24 @@ const HomeScreen = ({ navigation }) => {
                         <Text style={styles.time}>{coverTime(item.time)}</Text>
                       </View>
                     </View>
-                    <TouchableOpacity
-                      style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginStart: 'auto'
-                      }}
-                      onPress={() => {
-                        setSelectTab(index);
-                        handleShowSel(index);
-                      }}
-                    >
-                      <Entypo
-                        size={15}
-                        name='dots-three-vertical' />
-                    </TouchableOpacity>
                     {
-                      selectTab == index ? <View
-                        style={{
-                          borderWidth: 1
-                        }}
-                      >
-
-                      </View>
-                        : <></>
+                      userId === item.userId ?
+                        <TouchableOpacity
+                          style={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginStart: 'auto'
+                          }}
+                          onPress={() => {
+                            navigation.navigate('EditPosts', { item })
+                          }}
+                        >
+                          <Entypo
+                            size={15}
+                            name='dots-three-vertical' />
+                        </TouchableOpacity> : <></>
                     }
+
                   </View>
                   <Text style={styles.status}>{item.text}</Text>
                   {

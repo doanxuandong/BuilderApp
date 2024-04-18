@@ -9,102 +9,131 @@ import storage from '@react-native-firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid'
 
-const EditPosts = ({ navigation }) => {
+const EditPosts = ({ navigation, route }) => {
+  // console.log(route.params.item, 123)
+  let { text, userId, idPost } = route.params.item
+  let ii = route.params.item
+  // console.log(ii, 123)
+  useEffect(() => {
+    getName()
+    // delPost()
+  })
+  const [Name, setName] = useState()
+  const getName = async () => {
+    let temp
+    await firestore()
+      .collection('Users')
+      .doc(route.params.item.userId)
+      .get()
+      .then(dt => {
+        // console.log(dt, 1);
+        temp = dt._data.name
+      })
+    setName(temp);
+  }
 
-//   useEffect(() => {
-//     getName()
-//   })
+  const delPost = async () => {
+    let temp
+    let doIt = await firestore()
+      .collection('Posts')
+      .doc(userId)
+      .get()
+      .then(dt => {
+        temp = (dt._data.post)
+      })
+    // console.log(temp, 123)
+    let t
+    t = await temp.filter(item => item.idPost !== ii.idPost)
+    console.log(t, 123)
+    await firestore()
+      .collection('Posts')
+      .doc(userId)
+      .update({
+        post: t,
+      })
+  }
 
-//   const getName = async () => {
-//     await firestore()
-//       .collection('Users')
-//       .get()
-//       .then(dt => {
-//         // console.log(dt, 1);
-//       })
-//   }
+  const [imageData, setImageData] = useState(null);
+  const [imagePicked, setImagePicked] = useState(false);
+  const [listIma, setListIma] = useState([]);
 
-//   const [imageData, setImageData] = useState(null);
-//   const [imagePicked, setImagePicked] = useState(false);
-//   const [listIma, setListIma] = useState([]);
-
-//   const openGallery = async () => {
-//     const result = await launchImageLibrary({ mediaType: 'photo' });
+  const openGallery = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo' });
 
 
 
-//     if (result.assets != null || result.didCancel == false) {
-//       setImagePicked(true);
-//       if (imageData == null) {
-//         setImageData(result);
-//       }
-//       else if (imageData.assets.length >= 1) {
-//         imageData.assets.push(result.assets[0]);
-//       }
-//     }
-//   };
+    if (result.assets != null || result.didCancel == false) {
+      setImagePicked(true);
+      if (imageData == null) {
+        setImageData(result);
+      }
+      else if (imageData.assets.length >= 1) {
+        imageData.assets.push(result.assets[0]);
+      }
+    }
+  };
 
-//   const UpLoadImgProDuct = async () => {
+  const UpLoadImgProDuct = async () => {
 
-//     let temp = []
-//     imageData.assets.forEach(item => {
+    let temp = []
+    imageData.assets.forEach(item => {
 
-//       const reference = storage().ref(item.fileName);
-//       const pathToFile = item.uri;
-//       reference.putFile(pathToFile);
-//       storage()
-//         .ref(item.fileName)
-//         .getDownloadURL()
-//         .then(dt => {
-//           temp.push(dt);
-//           setListIma(temp)
-//           console.log(dt, 'list hinh');
-//         })
+      const reference = storage().ref(item.fileName);
+      const pathToFile = item.uri;
+      reference.putFile(pathToFile);
+      storage()
+        .ref(item.fileName)
+        .getDownloadURL()
+        .then(dt => {
+          temp.push(dt);
+          setListIma(temp)
+          console.log(dt, 'list hinh');
+        })
 
-//     });
-//     SetPost(listIma);
-//   };
+    });
+    SetPost(listIma);
+  };
 
-//   const [TextPost, setTextPost] = useState();
+  const [TextPost, setTextPost] = useState(text);
 
-//   const SetPost = async Img => {
-//     let userId = await AsyncStorage.getItem('USERID', userId);
-//     let idPost = uuid.v4();
-//     let PS = ({
-//       idPost: idPost,
-//       userId: userId,
-//       text: TextPost,
-//       img: Img,
-//       cmt: [],
-//       like: [],
-//       time: new Date(),
-//     })
-//     let t = firestore()
-//       .collection('Posts')
-//       .doc(userId)
-//     let check = await t.get()
-//     if (check.exists) {
-//       let temp = []
-//       temp = check._data.post
-//       temp.push(PS)
-//       firestore()
-//         .collection('Posts')
-//         .doc(userId)
-//         .set({
-//           post: temp,
-//         })
-//     }
-//     else {
-//       let temp = []
-//       temp.push(PS)
-//       firestore()
-//         .collection('Posts')
-//         .doc(userId)
-//         .set({
-//           post: temp,
-//         })
-//     }
-//   }
+  const SetPost = async Img => {
+    let userId = await AsyncStorage.getItem('USERID', userId);
+    let idPost = uuid.v4();
+    let PS = ({
+      idPost: idPost,
+      userId: userId,
+      text: TextPost,
+      img: Img,
+      cmt: [],
+      like: [],
+      time: new Date(),
+    })
+    let t = firestore()
+      .collection('Posts')
+      .doc(userId)
+    let check = await t.get()
+    if (check.exists) {
+      let temp = []
+      temp = check._data.post
+      temp.push(PS)
+      firestore()
+        .collection('Posts')
+        .doc(userId)
+        .set({
+          post: temp,
+        })
+    }
+    else {
+      let temp = []
+      temp.push(PS)
+      firestore()
+        .collection('Posts')
+        .doc(userId)
+        .set({
+          post: temp,
+        })
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -124,7 +153,7 @@ const EditPosts = ({ navigation }) => {
           <View style={styles.postHeader}>
             <Image source={require('./logo.png')} style={styles.avatar} />
             <View>
-              <Text style={styles.username}>Đoàn Xuân Đông</Text>
+              <Text style={styles.username}>{Name}</Text>
             </View>
           </View>
           <TextInput style={styles.status} placeholder='Nhập Status . . . . .'
@@ -144,9 +173,21 @@ const EditPosts = ({ navigation }) => {
         <TouchableOpacity
           onPress={() => {
             UpLoadImgProDuct();
+            delPost();
           }}
           style={styles.postButton}>
           <Text style={styles.TextPost}>Đăng</Text>
+        </TouchableOpacity>
+        <View style={{
+
+          marginVertical: 10
+        }} />
+        <TouchableOpacity
+          onPress={() => {
+            delPost();
+          }}
+          style={styles.postButton}>
+          <Text style={styles.TextPost}>Xóa</Text>
         </TouchableOpacity>
       </View>
     </View>
