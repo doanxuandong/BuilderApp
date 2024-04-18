@@ -30,18 +30,16 @@ const AddPostScreen = ({ navigation }) => {
   const openGallery = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo' });
 
-
-
     if (result.assets != null || result.didCancel == false) {
-      setImagePicked(true);
-      if (imageData == null) {
-        setImageData(result);
-      }
-      else if (imageData.assets.length >= 1) {
-        imageData.assets.push(result.assets[0]);
-      }
+        setImagePicked(true);
+        if (imageData == null) {
+            setImageData(result);
+        }
+        else if (imageData.assets.length >= 1) {
+            imageData.assets.push(result.assets[0]);
+        }
     }
-  };
+};
 
   const UpLoadImgProDuct = async () => {
 
@@ -57,7 +55,6 @@ const AddPostScreen = ({ navigation }) => {
         .then(dt => {
           temp.push(dt);
           setListIma(temp)
-          console.log(dt, 'list hinh');
         })
 
     });
