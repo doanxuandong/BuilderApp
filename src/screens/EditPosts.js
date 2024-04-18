@@ -174,6 +174,7 @@ const EditPosts = ({ navigation, route }) => {
           onPress={() => {
             UpLoadImgProDuct();
             delPost();
+            navigation.navigate('HomeScreen')
           }}
           style={styles.postButton}>
           <Text style={styles.TextPost}>Đăng</Text>
@@ -185,6 +186,7 @@ const EditPosts = ({ navigation, route }) => {
         <TouchableOpacity
           onPress={() => {
             delPost();
+            navigation.navigate('HomeScreen')
           }}
           style={styles.postButton}>
           <Text style={styles.TextPost}>Xóa</Text>
