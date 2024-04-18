@@ -75,7 +75,7 @@ const Edit = () => {
           placeholder="Nhập số lượng"
           keyboardType="numeric"
         />
-        <Text style={{fontWeight:'bold', color:'black', paddingVertical: 5,}} >Giá sản phẩm:</Text>
+        <Text style={{fontWeight:'bold', color:'black', paddingVertical: 5,}} it>Giá sản phẩm:</Text>
         <TextInput style={{borderWidth: 1, borderRadius: 5,}}
           value={price}
           onChangeText={setPrice}

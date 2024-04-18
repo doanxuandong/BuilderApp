@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
@@ -8,102 +9,102 @@ import storage from '@react-native-firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid'
 
-const AddPostScreen = ({ navigation }) => {
+const EditPosts = ({ navigation }) => {
 
-  useEffect(() => {
-    getName()
-  })
+//   useEffect(() => {
+//     getName()
+//   })
 
-  const getName = async () => {
-    await firestore()
-      .collection('Users')
-      .get()
-      .then(dt => {
-        // console.log(dt, 1);
-      })
-  }
+//   const getName = async () => {
+//     await firestore()
+//       .collection('Users')
+//       .get()
+//       .then(dt => {
+//         // console.log(dt, 1);
+//       })
+//   }
 
-  const [imageData, setImageData] = useState(null);
-  const [imagePicked, setImagePicked] = useState(false);
-  const [listIma, setListIma] = useState([]);
+//   const [imageData, setImageData] = useState(null);
+//   const [imagePicked, setImagePicked] = useState(false);
+//   const [listIma, setListIma] = useState([]);
 
-  const openGallery = async () => {
-    const result = await launchImageLibrary({ mediaType: 'photo' });
+//   const openGallery = async () => {
+//     const result = await launchImageLibrary({ mediaType: 'photo' });
 
 
 
-    if (result.assets != null || result.didCancel == false) {
-      setImagePicked(true);
-      if (imageData == null) {
-        setImageData(result);
-      }
-      else if (imageData.assets.length >= 1) {
-        imageData.assets.push(result.assets[0]);
-      }
-    }
-  };
+//     if (result.assets != null || result.didCancel == false) {
+//       setImagePicked(true);
+//       if (imageData == null) {
+//         setImageData(result);
+//       }
+//       else if (imageData.assets.length >= 1) {
+//         imageData.assets.push(result.assets[0]);
+//       }
+//     }
+//   };
 
-  const UpLoadImgProDuct = async () => {
+//   const UpLoadImgProDuct = async () => {
 
-    let temp = []
-    imageData.assets.forEach(item => {
+//     let temp = []
+//     imageData.assets.forEach(item => {
 
-      const reference = storage().ref(item.fileName);
-      const pathToFile = item.uri;
-      reference.putFile(pathToFile);
-      storage()
-        .ref(item.fileName)
-        .getDownloadURL()
-        .then(dt => {
-          temp.push(dt);
-          setListIma(temp)
-          console.log(dt, 'list hinh');
-        })
+//       const reference = storage().ref(item.fileName);
+//       const pathToFile = item.uri;
+//       reference.putFile(pathToFile);
+//       storage()
+//         .ref(item.fileName)
+//         .getDownloadURL()
+//         .then(dt => {
+//           temp.push(dt);
+//           setListIma(temp)
+//           console.log(dt, 'list hinh');
+//         })
 
-    });
-    SetPost(listIma);
-  };
+//     });
+//     SetPost(listIma);
+//   };
 
-  const [TextPost, setTextPost] = useState();
+//   const [TextPost, setTextPost] = useState();
 
-  const SetPost = async Img => {
-    let userId = await AsyncStorage.getItem('USERID', userId);
-    let idPost = uuid.v4();
-    let PS = ({
-      idPost: idPost,
-      userId: userId,
-      text: TextPost,
-      img: Img,
-      cmt: [],
-      like: [],
-      time: new Date(),
-    })
-    let t = firestore()
-      .collection('Posts')
-      .doc(userId)
-    let check = await t.get()
-    if (check.exists) {
-      let temp = []
-      temp = check._data.post
-      temp.push(PS)
-      firestore()
-        .collection('Posts')
-        .doc(userId)
-        .set({
-          post: temp,
-        })
-    }
-    else {
-      let temp = []
-      temp.push(PS)
-      firestore()
-        .collection('Posts')
-        .doc(userId)
-        .set({
-          post: temp,
-        })
-    }
-  }
+//   const SetPost = async Img => {
+//     let userId = await AsyncStorage.getItem('USERID', userId);
+//     let idPost = uuid.v4();
+//     let PS = ({
+//       idPost: idPost,
+//       userId: userId,
+//       text: TextPost,
+//       img: Img,
+//       cmt: [],
+//       like: [],
+//       time: new Date(),
+//     })
+//     let t = firestore()
+//       .collection('Posts')
+//       .doc(userId)
+//     let check = await t.get()
+//     if (check.exists) {
+//       let temp = []
+//       temp = check._data.post
+//       temp.push(PS)
+//       firestore()
+//         .collection('Posts')
+//         .doc(userId)
+//         .set({
+//           post: temp,
+//         })
+//     }
+//     else {
+//       let temp = []
+//       temp.push(PS)
+//       firestore()
+//         .collection('Posts')
+//         .doc(userId)
+//         .set({
+//           post: temp,
+//         })
+//     }
+//   }
 
   return (
     <View style={styles.container}>
@@ -127,7 +128,7 @@ const AddPostScreen = ({ navigation }) => {
             </View>
           </View>
           <TextInput style={styles.status} placeholder='Nhập Status . . . . .'
-            value={TextPost}
+            //value={TextPost}
             onChangeText={(txt) => {
               setTextPost(txt);
             }}
@@ -289,4 +290,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddPostScreen;
+export default EditPosts;

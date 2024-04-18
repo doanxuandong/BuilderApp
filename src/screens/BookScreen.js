@@ -3,9 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, FlatLi
 import Icon from 'react-native-vector-icons/FontAwesome';
 const BookScreen = ({navigation}) => {
   const handlePress = (item) => {
-    console.log("Pressed item:", item);
+    if (item.title === "Săt thép") {
+      navigation.navigate('Tabsatthep'); 
+    } else {
+      console.log("Pressed item:", item);
+    }
   };
-
   const items = [
     { id: 1, title: "Loại nhà" },
     { id: 2, title: "Săt thép" },

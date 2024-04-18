@@ -56,6 +56,7 @@ const Login = ({ navigation }) => {
 
   const handleForgotPassword = () => {
     // Xử lý logic khi người dùng quên mật khẩu ở đây
+    navigation.navigate('ForgotPassword');
     console.log('Quên mật khẩu');
   };
 

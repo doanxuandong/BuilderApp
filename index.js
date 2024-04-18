@@ -10,6 +10,7 @@ import Register from './src/screens/Register'
 import AppNavigator from './src/screens/Navigation/AppNavigator';
 import { name as appName } from './app.json';
 import Edit from './src/screens/Component/ListPro/Edit';
+import EditPosts from './src/screens/EditPosts'; 
 LogBox.ignoreAllLogs();
 
 AppRegistry.registerComponent(appName, () => AppNavigator);

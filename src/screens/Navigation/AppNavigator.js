@@ -11,6 +11,10 @@ import BookScreen from "../BookScreen";
 import AddPostScreen from "../AddPostScreen";
 import BrickCalculator from "../BrickCalculator";
 import Edit from "../Component/ListPro/Edit";
+import ForgotPassword from "../ForgotPassword";
+import Tabsatthep from "../Tabsatthep";
+import EditPosts from "../EditPosts";
+import ProfileScreen from "../ProfileScreen";
 const Stack = createStackNavigator();
 
 
@@ -66,6 +70,26 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name="HomeScreen"
                     component={props => <HomeScreen {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ForgotPassword"
+                    component={props => <ForgotPassword {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="Tabsatthep"
+                    component={props => <Tabsatthep {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="EditPosts"
+                    component={props => <EditPosts {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ProfileScreen"
+                    component={props => <ProfileScreen {...props} />}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>
