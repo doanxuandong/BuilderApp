@@ -4,7 +4,12 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { launchImageLibrary } from 'react-native-image-picker';
 
-const UserScreen = ({navigation}) => {
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid'
+
+const UserScreen = ({ navigation }) => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   const toggleDropdown = () => {
@@ -33,14 +38,14 @@ const UserScreen = ({navigation}) => {
     <ScrollView style={styles.container}>
       <View style={styles.headerbar}>
         <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('HomeScreen')} >
-            <Icon name="arrow-left" size={30} color="#900" />
-        </TouchableOpacity> 
+          <Icon name="arrow-left" size={30} color="#900" />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
           <Text style={styles.headerTitle}>BuilderApp</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerIcon} onPress={toggleDropdown}>
-            <Icon name="gear" size={30} color="#900" />
-        </TouchableOpacity> 
+          <Icon name="gear" size={30} color="#900" />
+        </TouchableOpacity>
       </View>
       <Modal
         animationType="slide"
@@ -67,7 +72,7 @@ const UserScreen = ({navigation}) => {
       <View style={styles.header}>
         <TouchableOpacity onPress={handleAvatarPress}>
           <View style={styles.avatarContainer}>
-          {avatarSource ? (
+            {avatarSource ? (
               <Image
                 source={{ uri: avatarSource }}
                 style={styles.avatar}
@@ -103,30 +108,30 @@ const UserScreen = ({navigation}) => {
       </View>
       <View style={styles.content}>
         <View style={styles.feedItem}>
-              <View style={styles.postHeader}>
-                <Image source={ require('./logo.png') } style={styles.avatar} />
-                <View>
-                  <Text style={styles.username}>Doan Xuan Dong</Text>
-                  <Text style={styles.time}>2 phút</Text>
-                </View>
-              </View>
-              <Text style={styles.status}>Love Ruby</Text>
-              <Image source={require('./logo.png')} style={styles.postImage} />
-              <View style={styles.reactions}>
-                <TouchableOpacity style={styles.reactionButton}>
-                  <Icon name="thumbs-up" size={20} color="#4267B2" />
-                  <Text style={styles.reactionText}>React</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.reactionButton}>
-                  <Icon name="comment" size={20} color="#4267B2" />
-                  <Text style={styles.reactionText}>Comment</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.reactionButton}>
-                  <Icon name="share" size={20} color="#4267B2" />
-                  <Text style={styles.reactionText}>Share</Text>
-                </TouchableOpacity>
-              </View>
+          <View style={styles.postHeader}>
+            <Image source={require('./logo.png')} style={styles.avatar} />
+            <View>
+              <Text style={styles.username}>Doan Xuan Dong</Text>
+              <Text style={styles.time}>2 phút</Text>
+            </View>
           </View>
+          <Text style={styles.status}>Love Ruby</Text>
+          <Image source={require('./logo.png')} style={styles.postImage} />
+          <View style={styles.reactions}>
+            <TouchableOpacity style={styles.reactionButton}>
+              <Icon name="thumbs-up" size={20} color="#4267B2" />
+              <Text style={styles.reactionText}>React</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.reactionButton}>
+              <Icon name="comment" size={20} color="#4267B2" />
+              <Text style={styles.reactionText}>Comment</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.reactionButton}>
+              <Icon name="share" size={20} color="#4267B2" />
+              <Text style={styles.reactionText}>Share</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
@@ -159,7 +164,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
   },
   avatarContainer: {
-    alignItems: 'center', 
+    alignItems: 'center',
     marginBottom: 10,
     marginTop: 150,
   },
@@ -216,7 +221,7 @@ const styles = StyleSheet.create({
   },
   menuFl: {
     flexDirection: 'row',
-    justifyContent:'center',
+    justifyContent: 'center',
     marginTop: 10,
     marginBottom: 10,
   },

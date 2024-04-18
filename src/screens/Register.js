@@ -32,6 +32,8 @@ const RegisterScreen = ({ navigation }) => {
         userName: username,
         pass: password,
         userId: userId,
+        sex: false,
+        address: '',
       })
   }
 

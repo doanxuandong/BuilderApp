@@ -130,7 +130,6 @@ const HomeScreen = ({ navigation }) => {
                       style={styles.postImage} />
                   }
 
-
                   <View style={styles.reactions}>
                     <TouchableOpacity style={styles.reactionButton}>
                       <Icon name="thumbs-up" size={20} color="#4267B2" />
