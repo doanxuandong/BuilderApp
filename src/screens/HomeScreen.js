@@ -125,7 +125,7 @@ const HomeScreen = ({ navigation }) => {
                   <Text style={styles.status}>{item.text}</Text>
                   {
                     item.img.length == 0 ? <></> : <Image source={{
-                      uri: item.img[0]
+                      uri: item.img
                     }}
                       style={styles.postImage} />
                   }

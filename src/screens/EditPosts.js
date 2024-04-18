@@ -59,51 +59,32 @@ const EditPosts = ({ navigation, route }) => {
 
   const openGallery = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo' });
-
-
-
-    if (result.assets != null || result.didCancel == false) {
-      setImagePicked(true);
-      if (imageData == null) {
-        setImageData(result);
-      }
-      else if (imageData.assets.length >= 1) {
-        imageData.assets.push(result.assets[0]);
-      }
-    }
+    setImageData(result);
+    console.log(result);
   };
 
   const UpLoadImgProDuct = async () => {
 
-    let temp = []
-    imageData.assets.forEach(item => {
-
-      const reference = storage().ref(item.fileName);
-      const pathToFile = item.uri;
-      reference.putFile(pathToFile);
-      storage()
-        .ref(item.fileName)
-        .getDownloadURL()
-        .then(dt => {
-          temp.push(dt);
-          setListIma(temp)
-          console.log(dt, 'list hinh');
-        })
-
-    });
-    SetPost(listIma);
+    const reference = storage().ref(imageData.assets[0].fileName);
+    const pathToFile = imageData.assets[0].uri;
+    // uploads file
+    await reference.putFile(pathToFile);
+    const url = await storage()
+      .ref(imageData.assets[0].fileName)
+      .getDownloadURL();
+    SetPost(url)
   };
 
-  const [TextPost, setTextPost] = useState(text);
+  const [TextPost, setTextPost] = useState();
 
-  const SetPost = async Img => {
+  const SetPost = async url => {
     let userId = await AsyncStorage.getItem('USERID', userId);
     let idPost = uuid.v4();
     let PS = ({
       idPost: idPost,
       userId: userId,
       text: TextPost,
-      img: Img,
+      img: url,
       cmt: [],
       like: [],
       time: new Date(),
