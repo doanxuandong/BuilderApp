@@ -34,6 +34,7 @@ const RegisterScreen = ({ navigation }) => {
         userId: userId,
         sex: false,
         address: '',
+        pic: ''
       })
   }
 

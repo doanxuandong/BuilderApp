@@ -61,7 +61,7 @@ const Edit = ({ navigation, route }) => {
         <TouchableOpacity style={{ padding: 5, }} onPress={() => navigation.navigate('HomeScreen')} >
           <Icon name="arrow-left" size={30} color="#900" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
+        <TouchableOpacity onPress={() => navigation.navigate('MainScreen')}>
           <Text style={{
             fontSize: 20,
             fontWeight: 'bold',

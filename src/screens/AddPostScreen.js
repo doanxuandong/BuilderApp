@@ -15,17 +15,21 @@ const AddPostScreen = ({ navigation }) => {
   })
 
   const getName = async () => {
+    let userId = await AsyncStorage.getItem('USERID')
+    let temp
     await firestore()
       .collection('Users')
+      .doc(userId)
       .get()
       .then(dt => {
-        // console.log(dt, 1);
+        temp = (dt._data.name);
       })
+    setName(temp)
   }
-
+  const [name, setName] = useState()
   const [imageData, setImageData] = useState(null);
   const [imagePicked, setImagePicked] = useState(false);
-  const [listIma, setListIma] = useState([]);
+  const [listIma, setListIma] = useState();
 
   const openGallery = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo' });
@@ -104,7 +108,7 @@ const AddPostScreen = ({ navigation }) => {
           <View style={styles.postHeader}>
             <Image source={require('./logo.png')} style={styles.avatar} />
             <View>
-              <Text style={styles.username}>Đoàn Xuân Đông</Text>
+              <Text style={styles.username}>{name}</Text>
             </View>
           </View>
           <TextInput style={styles.status} placeholder='Nhập Status . . . . .'
@@ -124,6 +128,7 @@ const AddPostScreen = ({ navigation }) => {
         <TouchableOpacity
           onPress={() => {
             UpLoadImgProDuct();
+            navigation.navigate('HomeScreen')
           }}
           style={styles.postButton}>
           <Text style={styles.TextPost}>Đăng</Text>

@@ -1,15 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, TouchableWithoutFeedback } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { launchImageLibrary } from 'react-native-image-picker';
 
-import firestore from '@react-native-firebase/firestore';
+import firestore, { firebase } from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid'
-
+let userId
 const UserScreen = ({ navigation }) => {
+  useEffect(() => {
+    getUser()
+  }, [])
+
+  const getUser = async () => {
+    let temp
+    userId = await AsyncStorage.getItem('USERID')
+    await firestore()
+      .collection('Users')
+      .doc(userId)
+      .get()
+      .then(dt => {
+        console.log(dt._data)
+        temp = dt._data
+      })
+    setIMG(temp.pic)
+    setName(temp.name)
+  }
+  const [IMG, setIMG] = useState('')
+  const [name, setName] = useState()
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   const toggleDropdown = () => {
@@ -22,18 +42,38 @@ const UserScreen = ({ navigation }) => {
 
   const [avatarSource, setAvatarSource] = useState(null);
 
-  const handleAvatarPress = () => {
-    launchImageLibrary({ mediaType: 'photo' }, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else {
-        setAvatarSource(response.uri);
-      }
-    });
+  const [imageData, setImageData] = useState(null);
+  const [imagePicked, setImagePicked] = useState(false);
+  const [listIma, setListIma] = useState();
+
+  const openGallery = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo' });
+    setImageData(result);
+    console.log(result);
+    UpLoadImgProDuct();
   };
 
+  const UpLoadImgProDuct = async () => {
+
+    const reference = storage().ref(imageData.assets[0].fileName);
+    const pathToFile = imageData.assets[0].uri;
+    // uploads file
+    await reference.putFile(pathToFile);
+    const url = await storage()
+      .ref(imageData.assets[0].fileName)
+      .getDownloadURL();
+    setPic(url)
+  };
+
+  const setPic = async url => {
+    await firestore()
+      .collection('Users')
+      .doc(userId)
+      .update({
+        pic: url
+      })
+  }
+  console.log(IMG);
   return (
     <ScrollView style={styles.container}>
       <View style={styles.headerbar}>
@@ -70,20 +110,22 @@ const UserScreen = ({ navigation }) => {
         </View>
       </Modal>
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleAvatarPress}>
+        <TouchableOpacity onPress={() => {
+          openGallery()
+        }}>
           <View style={styles.avatarContainer}>
-            {avatarSource ? (
+            {IMG != '' ? (
               <Image
-                source={{ uri: avatarSource }}
+                source={{ uri: IMG }}
                 style={styles.avatar}
               />
             ) : (
               <Image
-                source={{ uri: 'https://scontent.fsgn16-1.fna.fbcdn.net/v/t39.30808-1/411916691_1420161541912504_6983007839921214016_n.jpg?stp=dst-jpg_s320x320&_nc_cat=109&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeE9b4anm92_S5Qp38YDkGFPIVDLoX2h38QhUMuhfaHfxMyuFPxKNqqBRiZNL89UBSnXN3z5Ho3d9xXqR5uK2Y7K&_nc_ohc=_56zRvuZoiwAX-8fum7&_nc_ht=scontent.fsgn16-1.fna&oh=00_AfBlW-9_w62I1m-ZWUq0g8xLJud-fAxkKKZaALwNtN0VZg&oe=66000DC8' }}
+                source={{ uri: 'https://scontent.fsgn21-1.fna.fbcdn.net/v/t39.30808-6/435082593_1478268812724824_5095881726381349763_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeGn9BBMdnJFkdHcmDb5V3xu6ZJhs5cXN_DpkmGzlxc38Jx6_L-JNmOAB93mV25gcEHWBv5GUE2UjtZ0wye4Odc1&_nc_ohc=wuyCN_EV0XEAb5vRqSG&_nc_ht=scontent.fsgn21-1.fna&oh=00_AfAYA-gSarpBZ4l48mDUaFRBluLSKx-hCRpwnScsfIxtjg&oe=6626E911' }}
                 style={styles.avatar}
               />
             )}
-            <Text style={styles.TextName}>Đoàn Xuân Đông</Text>
+            <Text style={styles.TextName}>{name}</Text>
           </View>
         </TouchableOpacity>
         <View style={styles.menuFl}>

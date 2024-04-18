@@ -15,10 +15,17 @@ const ProfileScreen = ({ navigation }) => {
   }, [])
 
   const getUser = async () => {
+    let temp
     userId = await AsyncStorage.getItem('USERID')
-    
+    await firestore()
+      .collection('Users')
+      .doc(userId)
+      .get()
+      .then(dt => {
+        console.log(dt);
+      })
   }
-console.log(userId)
+  console.log(userId)
   const handleSave = () => {
     // Xử lý lưu thông tin
     Alert.alert('Đã lưu thay đổi!')

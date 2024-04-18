@@ -163,7 +163,7 @@ const MainScreen = ({ navigation }) => {
                   <TouchableOpacity
                     key={index}
                     style={styles.materialItem}
-                    // onPress={() => navigation.navigate('Edit',)}
+                  onPress={() => navigation.navigate('Edit',{item})}
                   >
                     <Text>{item.materialName}</Text>
                     {/* Hiển thị các thông tin khác của vật liệu (kích thước, số lượng, giá tiền) tùy ý */}
