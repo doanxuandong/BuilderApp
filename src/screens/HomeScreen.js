@@ -1,16 +1,72 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import Entypo from 'react-native-vector-icons/Entypo';
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid'
+import GetName from './Component/Home/GetName';
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({ navigation }) => {
+  useEffect(() => {
+    GetPost()
+  }, [])
+
+  const [list, setList] = useState()
+
+  const GetPost = async () => {
+    firestore()
+      .collection('Posts')
+      .onSnapshot(dt => {
+        // setList(dt._docs)
+        getList(dt.docs)
+      })
+  }
+
+  const getList = (data) => {
+    let goooo = []
+    data.map(item => {
+      let i = item._data.post;
+      i.map(ii => {
+        goooo.push(ii)
+      })
+    })
+    setList(goooo);
+    console.log(goooo, 1)
+  }
+
+  const coverTime = time => {
+    let date = time.toDate();
+    let mm = date.getMonth() + 1;
+    let dd = date.getDate();
+    let yyyy = date.getFullYear();
+    let munis = date.getMinutes();// phút
+    let hh = date.getHours(); // giờ
+    if (dd < '10')
+      dd = '0' + dd;
+    if (mm < '10')
+      mm = '0' + mm;
+    if (hh < '10')
+      hh = '0' + hh;
+    if (munis < '10')
+      munis = '0' + munis;
+    date = dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + munis;
+    return date;
+  }
+
+  const [selectTab, setSelectTab] = useState()
+  const handleShowSel = (index) => {
+    setSelectTab(index);
+  }
+
   return (
-  <View style={styles.container}>
-      <View style={styles.header}> 
+    <View style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
           <Text style={styles.headerTitle}>BuilderApp</Text>
-        </TouchableOpacity> 
+        </TouchableOpacity>
       </View>
       <View style={styles.searchContainer}>
         <TextInput
@@ -23,108 +79,83 @@ const HomeScreen = ({navigation}) => {
         </TouchableOpacity>
       </View>
       <View style={{ borderBottomColor: '#c65128', borderBottomWidth: 2 }} />
-      <ScrollView style={styles.feedContainer}>
-          <View style={styles.feedItem}>
-            <View style={styles.postHeader}>
-              <Image source={ require('./logo.png') } style={styles.avatar} />
-              <View>
-                <Text style={styles.username}>Doan Xuan Dong</Text>
-                <Text style={styles.time}>2 phút</Text>
-              </View>
-            </View>
-            <Text style={styles.status}>Love Ruby</Text>
-            <Image source={require('./logo.png')} style={styles.postImage} />
-            <View style={styles.reactions}>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="thumbs-up" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>React</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="comment" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>Comment</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="share" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>Share</Text>
-              </TouchableOpacity>
-            </View>
-        </View>
-        <View style={styles.feedItem}>
-            <View style={styles.postHeader}>
-              <Image source={ require('./logo.png') } style={styles.avatar} />
-              <View>
-                <Text style={styles.username}>Doan Xuan Dong</Text>
-                <Text style={styles.time}>2 phút</Text>
-              </View>
-            </View>
-            <Text style={styles.status}>Love Ruby</Text>
-            <Image source={require('./logo.png')} style={styles.postImage} />
-            <View style={styles.reactions}>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="thumbs-up" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>React</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="comment" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>Comment</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="share" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>Share</Text>
-              </TouchableOpacity>
-            </View>
-        </View>
-        <View style={styles.feedItem}>
-            <View style={styles.postHeader}>
-              <Image source={ require('./logo.png') } style={styles.avatar} />
-              <View>
-                <Text style={styles.username}>Doan Xuan Dong</Text>
-                <Text style={styles.time}>2 phút</Text>
-              </View>
-            </View>
-            <Text style={styles.status}>Love Ruby</Text>
-            <Image source={require('./logo.png')} style={styles.postImage} />
-            <View style={styles.reactions}>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="thumbs-up" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>React</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="comment" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>Comment</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="share" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>Share</Text>
-              </TouchableOpacity>
-            </View>
-        </View>
-        <View style={styles.feedItem}>
-            <View style={styles.postHeader}>
-              <Image source={ require('./logo.png') } style={styles.avatar} />
-              <View>
-                <Text style={styles.username}>Doan Xuan Dong</Text>
-                <Text style={styles.time}>2 phút</Text>
-              </View>
-            </View>
-            <Text style={styles.status}>Love Ruby</Text>
-            <Image source={require('./logo.png')} style={styles.postImage} />
-            <View style={styles.reactions}>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="thumbs-up" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>React</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="comment" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>Comment</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reactionButton}>
-                <Icon name="share" size={20} color="#4267B2" />
-                <Text style={styles.reactionText}>Share</Text>
-              </TouchableOpacity>
-            </View>
-        </View>
-      </ScrollView>
+      <View style={styles.feedContainer}>
+        <FlatList
+          data={list}
+          renderItem={({ item, index }) => {
+            return (
+              <>
+                <View style={styles.feedItem}>
+                  <View
+                    style={{
+                      borderWidth: 1,
+                      flexDirection: 'row'
+                    }}
+                  >
+                    <View style={styles.postHeader}>
+                      <Image source={require('./logo.png')} style={styles.avatar} />
+                      <View>
+                        <GetName userId={item.userId} />
+                        <Text style={styles.time}>{coverTime(item.time)}</Text>
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginStart: 'auto'
+                      }}
+                      onPress={() => {
+                        setSelectTab(index);
+                        handleShowSel(index);
+                      }}
+                    >
+                      <Entypo
+                        size={15}
+                        name='dots-three-vertical' />
+                    </TouchableOpacity>
+                    {
+                      selectTab == index ? <View
+                        style={{
+                          borderWidth: 1
+                        }}
+                      >
+
+                      </View>
+                        : <></>
+                    }
+                  </View>
+                  <Text style={styles.status}>{item.text}</Text>
+                  {
+                    item.img.length == 0 ? <></> : <Image source={{
+                      uri: item.img[0]
+                    }}
+                      style={styles.postImage} />
+                  }
+
+
+                  <View style={styles.reactions}>
+                    <TouchableOpacity style={styles.reactionButton}>
+                      <Icon name="thumbs-up" size={20} color="#4267B2" />
+                      <Text style={styles.reactionText}>React</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.reactionButton}>
+                      <Icon name="comment" size={20} color="#4267B2" />
+                      <Text style={styles.reactionText}>Comment</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.reactionButton}>
+                      <Icon name="share" size={20} color="#4267B2" />
+                      <Text style={styles.reactionText}>Share</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </>
+            )
+          }}
+        />
+
+
+      </View>
       <View style={{ borderBottomColor: '#c65128', borderBottomWidth: 2 }} />
       <View style={styles.mainView}>
         <View style={styles.menuBar}>
@@ -145,7 +176,7 @@ const HomeScreen = ({navigation}) => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </View >
   );
 };
 

@@ -9,6 +9,7 @@ import uuid from 'react-native-uuid'
 const Login = ({ navigation }) => {
 
   useEffect(() => {
+    console.log(1)
   })
 
 
@@ -21,7 +22,6 @@ const Login = ({ navigation }) => {
     // } else {
     //   alert('Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
     // }
-    let listAcc = []
     let check = false;
     let idUser
     let doIt = await firestore()
@@ -42,6 +42,7 @@ const Login = ({ navigation }) => {
         }
         else {
           alert('Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
+          console.log(123)
         }
       })
     // console.log('Email:', email);

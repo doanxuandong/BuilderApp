@@ -1,57 +1,156 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
-import ImagePicker from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const AddPostScreen = ({ navigation}) => {
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid'
+
+const AddPostScreen = ({ navigation }) => {
+
+  useEffect(() => {
+    getName()
+  })
+
+  const getName = async () => {
+    await firestore()
+      .collection('Users')
+      .get()
+      .then(dt => {
+        // console.log(dt, 1);
+      })
+  }
+
+  const [imageData, setImageData] = useState(null);
+  const [imagePicked, setImagePicked] = useState(false);
+  const [listIma, setListIma] = useState([]);
+
+  const openGallery = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo' });
+
+
+
+    if (result.assets != null || result.didCancel == false) {
+      setImagePicked(true);
+      if (imageData == null) {
+        setImageData(result);
+      }
+      else if (imageData.assets.length >= 1) {
+        imageData.assets.push(result.assets[0]);
+      }
+    }
+  };
+
+  const UpLoadImgProDuct = async () => {
+
+    let temp = []
+    imageData.assets.forEach(item => {
+
+      const reference = storage().ref(item.fileName);
+      const pathToFile = item.uri;
+      reference.putFile(pathToFile);
+      storage()
+        .ref(item.fileName)
+        .getDownloadURL()
+        .then(dt => {
+          temp.push(dt);
+          setListIma(temp)
+          console.log(dt, 'list hinh');
+        })
+
+    });
+    SetPost(listIma);
+  };
+
+  const [TextPost, setTextPost] = useState();
+
+  const SetPost = async Img => {
+    let userId = await AsyncStorage.getItem('USERID', userId);
+    let idPost = uuid.v4();
+    let PS = ({
+      idPost: idPost,
+      userId: userId,
+      text: TextPost,
+      img: Img,
+      cmt: [],
+      like: [],
+      time: new Date(),
+    })
+    let t = firestore()
+      .collection('Posts')
+      .doc(userId)
+    let check = await t.get()
+    if (check.exists) {
+      let temp = []
+      temp = check._data.post
+      temp.push(PS)
+      firestore()
+        .collection('Posts')
+        .doc(userId)
+        .set({
+          post: temp,
+        })
+    }
+    else {
+      let temp = []
+      temp.push(PS)
+      firestore()
+        .collection('Posts')
+        .doc(userId)
+        .set({
+          post: temp,
+        })
+    }
+  }
+
   return (
     <View style={styles.container}>
-        <View style={styles.header}> 
-          <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('HomeScreen')} >
-              <Icon name="arrow-left" size={30} color="#900" />
-          </TouchableOpacity> 
-          <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
-            <Text style={styles.headerTitle}>BuilderApp</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIcon}>
-              <Icon name="gear" size={30} color="#900" />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.mainView}>
-          <View style={styles.feedItem}>
-                <View style={styles.postHeader}>
-                  <Image source={ require('./logo.png') } style={styles.avatar} />
-                  <View>
-                    <Text style={styles.username}>Doan Xuan Dong</Text>
-                    <Text style={styles.time}>2 phút</Text>
-                  </View>
-                </View>
-                <TextInput style={styles.status} placeholder='Nhập Status . . . . .'></TextInput>
-                <TouchableOpacity style={styles.postImage}>
-                  <Text style={styles.uploadImage}>Tải ảnh lên</Text>
-                </TouchableOpacity>
-                <View style={styles.reactions}>
-                  <TouchableOpacity style={styles.reactionButton}>
-                    <Icon name="thumbs-up" size={20} color="#4267B2" />
-                    <Text style={styles.reactionText}>React</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.reactionButton}>
-                    <Icon name="comment" size={20} color="#4267B2" />
-                    <Text style={styles.reactionText}>Comment</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.reactionButton}>
-                    <Icon name="share" size={20} color="#4267B2" />
-                    <Text style={styles.reactionText}>Share</Text>
-                  </TouchableOpacity>
-                </View>
-            </View>
-            <TouchableOpacity style={styles.postButton}>
-               <Text style={styles.TextPost}>Đăng</Text>
-            </TouchableOpacity>
-        </View>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('HomeScreen')} >
+          <Icon name="arrow-left" size={30} color="#900" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
+          <Text style={styles.headerTitle}>BuilderApp</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.headerIcon}>
+          <Icon name="gear" size={30} color="#900" />
+        </TouchableOpacity>
       </View>
-    );
-  };
+      <View style={styles.mainView}>
+        <View style={styles.feedItem}>
+          <View style={styles.postHeader}>
+            <Image source={require('./logo.png')} style={styles.avatar} />
+            <View>
+              <Text style={styles.username}>Đông đóng đồ</Text>
+            </View>
+          </View>
+          <TextInput style={styles.status} placeholder='Nhập Status . . . . .'
+            value={TextPost}
+            onChangeText={(txt) => {
+              setTextPost(txt);
+            }}
+          ></TextInput>
+          <TouchableOpacity style={styles.postImage}
+            onPress={() => {
+              openGallery()
+            }}
+          >
+            <Text style={styles.uploadImage}>Tải ảnh lên</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          onPress={() => {
+            UpLoadImgProDuct();
+          }}
+          style={styles.postButton}>
+          <Text style={styles.TextPost}>Đăng</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -118,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#c65128',
     borderRadius: 5,
   },
-  TextPost:{
+  TextPost: {
     fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
@@ -172,7 +271,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   uploadImage: {
-    textAlign:'center',
+    textAlign: 'center',
     marginTop: 85,
   },
   reactions: {
