@@ -93,7 +93,7 @@ const UserScreen = ({navigation}) => {
           </TouchableOpacity>
         </View>
         <View style={styles.menu}>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('ProfileScreen')}>
             <Text style={styles.menuText}>Thông tin cá nhân</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem}>
