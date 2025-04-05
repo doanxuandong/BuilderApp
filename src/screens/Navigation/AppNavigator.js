@@ -15,6 +15,9 @@ import ForgotPassword from "../ForgotPassword";
 import Tabsatthep from "../Tabsatthep";
 import EditPosts from "../EditPosts";
 import ProfileScreen from "../ProfileScreen";
+import ListChat from "../Chat/ListChat";
+import ItemChat from "../Chat/Component/ItemChat";
+import BoxChat from "../Chat/BoxChat";
 const Stack = createStackNavigator();
 
 
@@ -90,6 +93,21 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name="ProfileScreen"
                     component={props => <ProfileScreen {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ListChat"
+                    component={props => <ListChat {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ItemChat"
+                    component={props => <ItemChat {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="BoxChat"
+                    component={props => <BoxChat {...props} />}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>

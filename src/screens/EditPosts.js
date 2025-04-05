@@ -59,7 +59,7 @@ const EditPosts = ({ navigation, route }) => {
 
   const openGallery = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo' });
-    setImageData(result);
+    setImageData(result)
     console.log(result);
   };
 

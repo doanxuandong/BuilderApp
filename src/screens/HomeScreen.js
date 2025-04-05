@@ -69,7 +69,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
+        <TouchableOpacity onPress={() => navigation.navigate('ListChat')}>
           <Text style={styles.headerTitle}>BuilderApp</Text>
         </TouchableOpacity>
       </View>
