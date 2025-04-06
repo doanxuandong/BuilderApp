@@ -13,4 +13,4 @@ const InputTextChat = () => {
 
 
 }
-export default InputTextChat
+export default InputTextChat;
