@@ -8,6 +8,7 @@ import storage from '@react-native-firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid'
 import GetName from './Component/Home/GetName';
+import UpAv from './Comment/UpAv';
 let userId = ''
 const HomeScreen = ({ navigation }) => {
   useEffect(() => {
@@ -19,8 +20,8 @@ const HomeScreen = ({ navigation }) => {
 
   const getUserId = async () => {
     userId = await AsyncStorage.getItem('USERID')
+    console.log(userId, 123)
   }
-
   const GetPost = async () => {
     firestore()
       .collection('Posts')
@@ -97,7 +98,7 @@ const HomeScreen = ({ navigation }) => {
                     }}
                   >
                     <View style={styles.postHeader}>
-                      <Image source={require('./logo.png')} style={styles.avatar} />
+                      <UpAv cons={item.userId} />
                       <View>
                         <GetName userId={item.userId} />
                         <Text style={styles.time}>{coverTime(item.time)}</Text>
@@ -135,7 +136,11 @@ const HomeScreen = ({ navigation }) => {
                       <Icon name="thumbs-up" size={20} color="#4267B2" />
                       <Text style={styles.reactionText}>React</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.reactionButton}>
+                    <TouchableOpacity style={styles.reactionButton}
+                      onPress={() => {
+                        navigation.navigate('ListComment', item)
+                      }}
+                    >
                       <Icon name="comment" size={20} color="#4267B2" />
                       <Text style={styles.reactionText}>Comment</Text>
                     </TouchableOpacity>
