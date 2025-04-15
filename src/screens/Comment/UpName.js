@@ -11,7 +11,7 @@ import storage from '@react-native-firebase/storage';
 const UpName = (props) => {
 
     const [name, setName] = useState('');
-    
+
     const Name = async userId => {
         firestore()
             .collection('Users')

@@ -20,7 +20,6 @@ const HomeScreen = ({ navigation }) => {
 
   const getUserId = async () => {
     userId = await AsyncStorage.getItem('USERID')
-    console.log(userId, 123)
   }
   const GetPost = async () => {
     firestore()
@@ -40,7 +39,6 @@ const HomeScreen = ({ navigation }) => {
       })
     })
     setList(goooo);
-    console.log(goooo, 1)
   }
 
   const coverTime = time => {
@@ -99,10 +97,18 @@ const HomeScreen = ({ navigation }) => {
                   >
                     <View style={styles.postHeader}>
                       <UpAv cons={item.userId} />
-                      <View>
-                        <GetName userId={item.userId} />
-                        <Text style={styles.time}>{coverTime(item.time)}</Text>
-                      </View>
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (item.userId !== userId) {
+                            navigation.navigate('ProfileUser', { userId: item.userId });
+                          }
+                        }}
+                      >
+                        <View>
+                          <GetName userId={item.userId} />
+                          <Text style={styles.time}>{coverTime(item.time)}</Text>
+                        </View>
+                      </TouchableOpacity>
                     </View>
                     {
                       userId === item.userId ?

@@ -1,44 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import UpName from '../Comment/UpName';
-import UpAv from '../Comment/UpAv';
+import UpName from './Comment/UpName';
+import UpAv from './Comment/UpAv';
 
 const BoxChat = ({ route, navigation }) => {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState('');
     const [currentUserId, setCurrentUserId] = useState(null);
     const { userId } = route.params;
-    const unsubscribeRef = useRef(null);
-    const flatListRef = useRef(null);
 
     useEffect(() => {
         getCurrentUserId();
-        return () => {
-            // Cleanup listener when component unmounts
-            if (unsubscribeRef.current) {
-                unsubscribeRef.current();
-            }
-        };
+        fetchMessages();
     }, []);
-
-    useEffect(() => {
-        if (currentUserId && userId) {
-            fetchMessages();
-        }
-    }, [currentUserId, userId]);
-
-    useEffect(() => {
-        if (messages.length > 0) {
-            // Scroll to bottom when messages change
-            setTimeout(() => {
-                flatListRef.current?.scrollToEnd({ animated: true });
-            }, 100);
-        }
-    }, [messages]);
 
     const getCurrentUserId = async () => {
         const id = await AsyncStorage.getItem('USERID');
@@ -49,11 +27,6 @@ const BoxChat = ({ route, navigation }) => {
         if (!currentUserId || !userId) return;
 
         const chatId = [currentUserId, userId].sort().join('_');
-
-        // Cleanup previous listener if exists
-        if (unsubscribeRef.current) {
-            unsubscribeRef.current();
-        }
 
         const unsubscribe = firestore()
             .collection('Chats')
@@ -66,12 +39,9 @@ const BoxChat = ({ route, navigation }) => {
                     ...doc.data()
                 }));
                 setMessages(messages);
-            }, error => {
-                console.error('Error fetching messages:', error);
             });
 
-        // Store unsubscribe function in ref
-        unsubscribeRef.current = unsubscribe;
+        return () => unsubscribe();
     };
 
     const sendMessage = async () => {
@@ -85,25 +55,6 @@ const BoxChat = ({ route, navigation }) => {
         };
 
         try {
-            // Check if chat exists
-            const chatDoc = await firestore()
-                .collection('Chats')
-                .doc(chatId)
-                .get();
-
-            if (!chatDoc.exists) {
-                // Create new chat if it doesn't exist
-                await firestore()
-                    .collection('Chats')
-                    .doc(chatId)
-                    .set({
-                        participants: [currentUserId, userId],
-                        createdAt: new Date(),
-                        lastMessage: message.text,
-                        lastMessageTime: message.createdAt,
-                    });
-            }
-
             // Add message to messages subcollection
             await firestore()
                 .collection('Chats')
@@ -115,10 +66,11 @@ const BoxChat = ({ route, navigation }) => {
             await firestore()
                 .collection('Chats')
                 .doc(chatId)
-                .update({
+                .set({
                     lastMessage: message.text,
                     lastMessageTime: message.createdAt,
-                });
+                    participants: [currentUserId, userId],
+                }, { merge: true });
 
             setText('');
         } catch (error) {
@@ -141,7 +93,7 @@ const BoxChat = ({ route, navigation }) => {
                             }
                         }}
                     >
-                        {/* <UpAv cons={item.userId} /> */}
+                        <UpAv cons={item.userId} />
                     </TouchableOpacity>
                 )}
                 <View style={styles.messageContent}>
@@ -153,7 +105,7 @@ const BoxChat = ({ route, navigation }) => {
                                 }
                             }}
                         >
-                            {/* <UpName cons={item.userId} /> */}
+                            <UpName cons={item.userId} />
                         </TouchableOpacity>
                     )}
                     <Text style={styles.messageText}>{item.text}</Text>
@@ -178,19 +130,11 @@ const BoxChat = ({ route, navigation }) => {
             </View>
 
             <FlatList
-                ref={flatListRef}
                 data={messages}
                 renderItem={renderMessage}
                 keyExtractor={item => item.id}
                 style={styles.messagesList}
-                inverted={false}
-                onEndReached={() => {
-                    // Load more messages if needed
-                }}
-                onEndReachedThreshold={0.5}
-                onContentSizeChange={() => {
-                    flatListRef.current?.scrollToEnd({ animated: true });
-                }}
+                inverted
             />
 
             <View style={styles.inputContainer}>
@@ -284,4 +228,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default BoxChat;
+export default BoxChat; 

@@ -1,83 +1,136 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, SafeAreaView, TouchableOpacity, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import uuid from 'react-native-uuid'
-import ItemChat from './Component/ItemChat';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import UpName from '../Comment/UpName';
+import UpAv from '../Comment/UpAv';
 
-const sampleData = [
-    {
-        id: '1',
-        avatar: 'https://i.pravatar.cc/150?img=3',
-        name: 'Huỳnh Tuấn Anh',
-    },
-    {
-        id: '2',
-        avatar: 'https://i.pravatar.cc/150?img=5',
-        name: 'Lê Minh Hoàng',
-    },
-    {
-        id: '3',
-        avatar: 'https://i.pravatar.cc/150?img=6',
-        name: 'Nguyễn Thu Hà',
-    },
-];
 const ListChat = ({ navigation }) => {
-    const [chatList, setChatList] = useState([]);
+    const [chats, setChats] = useState([]);
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     useEffect(() => {
-        // Bạn có thể fetch từ Firestore tại đây
-        setChatList(sampleData);
+        getCurrentUserId();
     }, []);
 
-    const renderItem = ({ item }) => (
-        <ItemChat
-            avatar={item.avatar}
-            name={item.name}
-            navigation={navigation}
-        />
-    );
+    useEffect(() => {
+        if (currentUserId) {
+            fetchChats();
+        }
+    }, [currentUserId]);
+
+    const getCurrentUserId = async () => {
+        const id = await AsyncStorage.getItem('USERID');
+        setCurrentUserId(id);
+    };
+
+    const fetchChats = () => {
+        const unsubscribe = firestore()
+            .collection('Chats')
+            .where('participants', 'array-contains', currentUserId)
+            .orderBy('lastMessageTime', 'desc')
+            .onSnapshot(snapshot => {
+                const chatsData = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setChats(chatsData);
+            }, error => {
+                console.error('Error fetching chats:', error);
+            });
+
+        return () => unsubscribe();
+    };
+
+    const getOtherUserId = (participants) => {
+        return participants.find(id => id !== currentUserId);
+    };
+
+    const renderChatItem = ({ item }) => {
+        const otherUserId = getOtherUserId(item.participants);
+        return (
+            <TouchableOpacity
+                style={styles.chatItem}
+                onPress={() => navigation.navigate('BoxChat', { userId: otherUserId })}
+            >
+                <View style={styles.avatarContainer}>
+                    <UpAv cons={otherUserId} />
+                </View>
+                <View style={styles.chatInfo}>
+                    <View style={styles.nameAndTime}>
+                        <UpName cons={otherUserId} />
+                        <Text style={styles.time}>
+                            {item.lastMessageTime ? new Date(item.lastMessageTime.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                        </Text>
+                    </View>
+                    <Text style={styles.lastMessage} numberOfLines={1}>
+                        {item.lastMessage || 'Chưa có tin nhắn'}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        );
+    };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View
-                style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}
-            >
-                <Text
-                    style={{
-                        fontWeight: 'bold',
-                        fontSize: 20
-                    }}
-                >
-                    Box chat
-                </Text>
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>Tin nhắn</Text>
             </View>
             <FlatList
-                data={chatList}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-                contentContainerStyle={styles.listContent}
-                showsVerticalScrollIndicator={false}
+                data={chats}
+                renderItem={renderChatItem}
+                keyExtractor={item => item.id}
+                contentContainerStyle={styles.listContainer}
             />
-        </SafeAreaView>
+        </View>
     );
 };
-
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fff',
     },
-    listContent: {
-        paddingVertical: 10,
+    header: {
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    listContainer: {
+        padding: 10,
+    },
+    chatItem: {
+        flexDirection: 'row',
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    avatarContainer: {
+        marginRight: 10,
+    },
+    chatInfo: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    nameAndTime: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    time: {
+        fontSize: 12,
+        color: '#666',
+    },
+    lastMessage: {
+        fontSize: 14,
+        color: '#666',
     },
 });
+
 export default ListChat;

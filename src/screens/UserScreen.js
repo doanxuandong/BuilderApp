@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, TouchableWithoutFeedback, FlatList, ActivityIndicator } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -8,11 +8,49 @@ import firestore, { firebase } from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid'
+import UpAv from './Comment/UpAv';
+import GetName from './Component/Home/GetName';
+
 let userId
 const UserScreen = ({ navigation }) => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [IMG, setIMG] = useState('')
+  const [name, setName] = useState()
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+
   useEffect(() => {
-    getUser()
-  }, [])
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    setLoading(true);
+    const unsubscribe = firestore()
+      .collection('Posts')
+      .doc(userId)
+      .onSnapshot(
+        (documentSnapshot) => {
+          setLoading(false);
+          if (documentSnapshot.exists) {
+            const postsData = documentSnapshot.data().post || [];
+            const sortedPosts = postsData.sort((a, b) => b.time.toDate() - a.time.toDate());
+            setPosts(sortedPosts);
+          } else {
+            setPosts([]);
+          }
+        },
+        (error) => {
+          console.error('Error fetching posts:', error);
+          setError('Không thể tải bài viết. Vui lòng thử lại sau.');
+          setLoading(false);
+        }
+      );
+
+    return () => unsubscribe();
+  }, [userId]);
 
   const getUser = async () => {
     let temp
@@ -28,9 +66,51 @@ const UserScreen = ({ navigation }) => {
     setIMG(temp.pic)
     setName(temp.name)
   }
-  const [IMG, setIMG] = useState('')
-  const [name, setName] = useState()
-  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+
+  const coverTime = time => {
+    let date = time.toDate();
+    let mm = date.getMonth() + 1;
+    let dd = date.getDate();
+    let yyyy = date.getFullYear();
+    let munis = date.getMinutes();
+    let hh = date.getHours();
+    if (dd < '10') dd = '0' + dd;
+    if (mm < '10') mm = '0' + mm;
+    if (hh < '10') hh = '0' + hh;
+    if (munis < '10') munis = '0' + munis;
+    date = dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + munis;
+    return date;
+  };
+
+  const renderPost = ({ item }) => (
+    <View style={styles.feedItem}>
+      <View style={styles.postHeader}>
+        <UpAv cons={item.userId} />
+        <View>
+          <GetName userId={item.userId} />
+          <Text style={styles.time}>{coverTime(item.time)}</Text>
+        </View>
+      </View>
+      <Text style={styles.status}>{item.text}</Text>
+      {item.img && item.img.length > 0 && (
+        <Image source={{ uri: item.img }} style={styles.postImage} />
+      )}
+      <View style={styles.reactions}>
+        <TouchableOpacity style={styles.reactionButton}>
+          <Icon name="thumbs-up" size={20} color="#4267B2" />
+          <Text style={styles.reactionText}>React</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.reactionButton}>
+          <Icon name="comment" size={20} color="#4267B2" />
+          <Text style={styles.reactionText}>Comment</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.reactionButton}>
+          <Icon name="share" size={20} color="#4267B2" />
+          <Text style={styles.reactionText}>Share</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   const toggleDropdown = () => {
     setIsDropdownVisible(prevState => !prevState);
@@ -74,6 +154,51 @@ const UserScreen = ({ navigation }) => {
       })
   }
   console.log(IMG);
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#c65128" />
+        </View>
+      );
+    }
+
+    if (error) {
+      return (
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => {
+              setError(null);
+              getUser();
+            }}
+          >
+            <Text style={styles.retryText}>Thử lại</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    if (posts.length === 0) {
+      return (
+        <View style={styles.centerContainer}>
+          <Text style={styles.noPostText}>Chưa có bài viết nào</Text>
+        </View>
+      );
+    }
+
+    return (
+      <FlatList
+        data={posts}
+        renderItem={renderPost}
+        keyExtractor={(item, index) => index.toString()}
+        scrollEnabled={false}
+      />
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.headerbar}>
@@ -135,9 +260,6 @@ const UserScreen = ({ navigation }) => {
           <TouchableOpacity>
             <Text style={styles.menuFlText} >Follow: 1000</Text>
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Text style={styles.menuFlText} >Like: 400</Text>
-          </TouchableOpacity>
         </View>
         <View style={styles.menu}>
           <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('ProfileScreen')}>
@@ -149,31 +271,7 @@ const UserScreen = ({ navigation }) => {
         </View>
       </View>
       <View style={styles.content}>
-        <View style={styles.feedItem}>
-          <View style={styles.postHeader}>
-            <Image source={require('./logo.png')} style={styles.avatar} />
-            <View>
-              <Text style={styles.username}>Doan Xuan Dong</Text>
-              <Text style={styles.time}>2 phút</Text>
-            </View>
-          </View>
-          <Text style={styles.status}>Love Ruby</Text>
-          <Image source={require('./logo.png')} style={styles.postImage} />
-          <View style={styles.reactions}>
-            <TouchableOpacity style={styles.reactionButton}>
-              <Icon name="thumbs-up" size={20} color="#4267B2" />
-              <Text style={styles.reactionText}>React</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.reactionButton}>
-              <Icon name="comment" size={20} color="#4267B2" />
-              <Text style={styles.reactionText}>Comment</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.reactionButton}>
-              <Icon name="share" size={20} color="#4267B2" />
-              <Text style={styles.reactionText}>Share</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        {renderContent()}
       </View>
     </ScrollView>
   );
@@ -326,6 +424,32 @@ const styles = StyleSheet.create({
   reactionText: {
     marginLeft: 5,
     fontSize: 14,
+    color: '#666',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  retryButton: {
+    backgroundColor: '#c65128',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  retryText: {
+    color: 'white',
+    fontSize: 14,
+  },
+  noPostText: {
+    fontSize: 16,
     color: '#666',
   },
 });

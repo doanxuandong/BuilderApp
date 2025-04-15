@@ -65,7 +65,7 @@ const ListComment = ({ route, navigation }) => {
     };
 
     const renderItem = ({ item }) => (
-        <ItemComment item={item} />
+        <ItemComment item={item} navigation={navigation} />
     );
 
     return (

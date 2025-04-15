@@ -1,18 +1,25 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const ItemChat = ({ name, navigation, email }) => {
+    const handlePress = async () => {
+        try {
+            await AsyncStorage.setItem('data', email);
+            navigation.navigate('BoxChat');
+        } catch (error) {
+            console.error('Error saving email:', error);
+        }
+    };
 
-const ItemChat = ({ avatar, name, navigation }) => {
     return (
         <TouchableOpacity
             style={styles.container}
-            onPress={() => {
-                navigation.navigate('BoxChat')
-            }}
+            onPress={handlePress}
         >
-            <Image source={{ uri: avatar }} style={styles.avatar} />
             <View style={styles.textContainer}>
                 <Text style={styles.name}>{name}</Text>
+                <Text style={styles.email}>{email}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -21,48 +28,27 @@ const ItemChat = ({ avatar, name, navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        padding: 10,
+        padding: 15,
         alignItems: 'center',
-        backgroundColor: '#fff', // đổi nền trắng
-        borderWidth: 1,           // thêm viền
-        borderColor: '#ccc',      // màu viền xám nhạt
-        borderRadius: 8,          // bo góc nhẹ
-        marginVertical: 5,        // cách giữa các item nếu cần
-        marginHorizontal: 10,     // lề hai bên
-    },
-
-    avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        marginVertical: 5,
+        marginHorizontal: 10,
     },
     textContainer: {
         flex: 1,
-        marginLeft: 10,
     },
     name: {
         color: 'black',
         fontWeight: 'bold',
         fontSize: 16,
     },
-    message: {
+    email: {
         color: 'gray',
-        marginTop: 2,
-    },
-    rightSection: {
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-    },
-    time: {
-        color: 'gray',
-        fontSize: 12,
-    },
-    unreadDot: {
-        width: 10,
-        height: 10,
-        backgroundColor: '#00AEEF',
-        borderRadius: 5,
-        marginTop: 5,
+        marginTop: 4,
+        fontSize: 14,
     },
 });
 

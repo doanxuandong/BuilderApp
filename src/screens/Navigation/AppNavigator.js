@@ -19,6 +19,8 @@ import ListChat from "../Chat/ListChat";
 import ItemChat from "../Chat/Component/ItemChat";
 import BoxChat from "../Chat/BoxChat";
 import ListComment from "../Comment/ListComment";
+import ProfileUser from "../ProfileUser";
+import ItemComment from "../Comment/ItemComment";
 const Stack = createStackNavigator();
 
 
@@ -115,6 +117,16 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name="ListComment"
                     component={props => <ListComment {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ProfileUser"
+                    component={props => <ProfileUser {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ItemComment"
+                    component={props => <ItemComment {...props} />}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>

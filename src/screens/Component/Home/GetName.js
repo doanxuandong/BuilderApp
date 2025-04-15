@@ -9,29 +9,35 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid'
 
 const GetName = (props) => {
+    const [name, setName] = useState('');
 
     useEffect(() => {
-        getName()
-    }, [])
-    const [name, setName] = useState()
-    // console.log(props)
+        getName();
+    }, [props.userId]);
+
     const getName = async () => {
-        let temp
-        let doit = await firestore()
-            .collection('Users')
-            .doc(props.userId)
-            .get()
-            .then(dt => {
-                temp = dt._data.name
-            })
-        setName(temp)
-    }
+        try {
+            const userDoc = await firestore()
+                .collection('Users')
+                .doc(props.userId)
+                .get();
+
+            if (userDoc.exists) {
+                const userName = userDoc.data().name;
+                setName(userName);
+            } else {
+                setName('Unknown User');
+            }
+        } catch (error) {
+            console.error('Error getting name:', error);
+            setName('Error');
+        }
+    };
+
     return (
         <Text style={styles.username}>{name}</Text>
-    )
-
-}
-
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -128,6 +134,7 @@ const styles = StyleSheet.create({
     username: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#000000', // Explicitly set text color to black
     },
     time: {
         fontSize: 12,
@@ -156,7 +163,5 @@ const styles = StyleSheet.create({
         color: '#666',
     },
 });
-
-
 
 export default GetName;
