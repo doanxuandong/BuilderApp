@@ -13,7 +13,10 @@ import Edit from './src/screens/Component/ListPro/Edit';
 import EditPosts from './src/screens/EditPosts';
 import ItemChat from './src/screens/Chat/Component/ItemChat';
 import ListChat from './src/screens/Chat/ListChat';
+LogBox.ignoreAllLogs(true);
 
-LogBox.ignoreAllLogs();
+console.disableYellowBox = true;
+console.warn = () => { };
+// console.error = () => { };
 
 AppRegistry.registerComponent(appName, () => AppNavigator);

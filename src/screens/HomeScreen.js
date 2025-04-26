@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, FlatList, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -64,6 +64,9 @@ const HomeScreen = ({ navigation }) => {
   const handleShowSel = (index) => {
     setSelectTab(index);
   }
+  const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportingPost, setReportingPost] = useState(null);
   // console.log(userId);
   return (
     <View style={styles.container}>
@@ -125,7 +128,22 @@ const HomeScreen = ({ navigation }) => {
                           <Entypo
                             size={15}
                             name='dots-three-vertical' />
-                        </TouchableOpacity> : <></>
+                        </TouchableOpacity> :
+                        <TouchableOpacity
+                          style={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginStart: 'auto'
+                          }}
+                          onPress={() => {
+                            setReportingPost(item);
+                            setReportModalVisible(true);
+                          }}
+                        >
+                          <Entypo
+                            size={15}
+                            name='dots-three-vertical' />
+                        </TouchableOpacity>
                     }
 
                   </View>
@@ -183,6 +201,44 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
+      <Modal visible={reportModalVisible} transparent animationType="slide">
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#00000099' }}>
+          <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '80%' }}>
+            <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>Nhập lý do report</Text>
+            <TextInput
+              placeholder="Nhập lý do..."
+              value={reportReason}
+              onChangeText={setReportReason}
+              style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginBottom: 10, padding: 8 }}
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+              <TouchableOpacity onPress={() => setReportModalVisible(false)} style={{ marginRight: 10 }}>
+                <Text>Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  if (reportingPost && reportReason.trim()) {
+                    await firestore().collection('PostReports').add({
+                      idPost: reportingPost.idPost,
+                      userId: reportingPost.userId,
+                      reporterId: userId,
+                      reason: reportReason,
+                      time: new Date(),
+                      postContent: reportingPost.text,
+                    });
+                    setReportModalVisible(false);
+                    setReportReason('');
+                    setReportingPost(null);
+                    alert('Đã gửi report!');
+                  }
+                }}
+              >
+                <Text style={{ color: '#c65128', fontWeight: 'bold' }}>Gửi</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View >
   );
 };

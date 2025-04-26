@@ -34,7 +34,8 @@ const RegisterScreen = ({ navigation }) => {
         userId: userId,
         sex: false,
         address: '',
-        pic: ''
+        pic: '',
+        type: '1',
       })
   }
 
@@ -107,14 +108,7 @@ const RegisterScreen = ({ navigation }) => {
         onChangeText={text => setEmail(text)}
       />
       {errors.email && <Text style={styles.error}>{errors.email}</Text>}
-      {/* <TextInput
-        style={styles.input}
-        placeholder="Năm sinh"
-        keyboardType="numeric"
-        value={dateOfBirth}
-        onChangeText={text => setDateOfBirth(text)}
-      />
-      {errors.dateOfBirth && <Text style={styles.error}>{errors.dateOfBirth}</Text>} */}
+
       <TextInput
         style={styles.input}
         placeholder="Tên đăng nhập"

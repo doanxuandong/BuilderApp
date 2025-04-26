@@ -21,6 +21,11 @@ import BoxChat from "../Chat/BoxChat";
 import ListComment from "../Comment/ListComment";
 import ProfileUser from "../ProfileUser";
 import ItemComment from "../Comment/ItemComment";
+import AdminDashboard from '../Admin/AdminDashboard';
+import ManageAccounts from '../Admin/ManageAccounts';
+import ManagePosts from '../Admin/ManagePosts';
+import ManageReposts from '../Admin/ManageReposts';
+import { ReportDetailScreen } from '../Admin/ManageReposts';
 const Stack = createStackNavigator();
 
 
@@ -127,6 +132,31 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name="ItemComment"
                     component={props => <ItemComment {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="AdminDashboard"
+                    component={props => <AdminDashboard {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ManageAccounts"
+                    component={props => <ManageAccounts {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ManagePosts"
+                    component={props => <ManagePosts {...props} />}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ManageReposts"
+                    component={ManageReposts}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ReportDetail"
+                    component={ReportDetailScreen}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>

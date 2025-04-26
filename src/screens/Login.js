@@ -8,12 +8,8 @@ import uuid from 'react-native-uuid'
 
 const Login = ({ navigation }) => {
 
-  useEffect(() => {
-    console.log(1)
-  })
 
-
-  const [email, setEmail] = useState('0855708546');
+  const [email, setEmail] = useState('0973281001');
   const [password, setPassword] = useState('1');
 
   const handleLogin = async () => {
@@ -23,41 +19,45 @@ const Login = ({ navigation }) => {
     //   alert('Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
     // }
     let check = false;
-    let idUser
+    let idUser;
+    let userType = '1';
     let doIt = await firestore()
       .collection('Users')
       .get()
       .then(dt => {
         dt.docs.map(item => {
-          console.log(item._data, 1)
+
           if (item._data.phone === email) {
             if (item._data.pass === password) {
-              check = true
+              check = true;
               idUser = item._data.userId;
+              userType = item._data.type;
             }
           }
         })
         if (check === true) {
-          Loging(idUser)
+          Loging(idUser, userType);
         }
         else {
           alert('Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
-          console.log(123)
+
         }
       })
-    // console.log('Email:', email);
-    // console.log('Password:', password);
+
   };
 
-  const Loging = async idUser => {
-    await AsyncStorage.setItem('USERID', idUser)
-    navigation.navigate('HomeScreen');
+  const Loging = async (idUser, userType) => {
+    await AsyncStorage.setItem('USERID', idUser);
+    if (userType === '0' || userType === 0) {
+      navigation.navigate('AdminDashboard');
+    } else {
+      navigation.navigate('HomeScreen');
+    }
   }
 
   const handleForgotPassword = () => {
     // Xử lý logic khi người dùng quên mật khẩu ở đây
     navigation.navigate('ForgotPassword');
-    console.log('Quên mật khẩu');
   };
 
   const handleRegister = () => {
