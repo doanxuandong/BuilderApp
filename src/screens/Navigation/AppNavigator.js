@@ -26,6 +26,7 @@ import ManageAccounts from '../Admin/ManageAccounts';
 import ManagePosts from '../Admin/ManagePosts';
 import ManageReposts from '../Admin/ManageReposts';
 import { ReportDetailScreen } from '../Admin/ManageReposts';
+import UserProducts from "../UserProducts";
 const Stack = createStackNavigator();
 
 
@@ -157,6 +158,11 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name="ReportDetail"
                     component={ReportDetailScreen}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="UserProducts"
+                    component={UserProducts}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>

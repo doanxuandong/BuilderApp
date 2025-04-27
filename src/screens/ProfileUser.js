@@ -161,6 +161,10 @@ const ProfileUser = ({ navigation, route }) => {
     }
     console.log(IMG);
 
+    const handleViewProducts = () => {
+        navigation.navigate('UserProducts', { userId: targetUserId });
+    };
+
     const renderContent = () => {
         if (loading) {
             return (
@@ -269,15 +273,11 @@ const ProfileUser = ({ navigation, route }) => {
                         <Text style={styles.menuFlText}>Following:50</Text>
                     </TouchableOpacity>
                     <TouchableOpacity>
-                        <Text style={styles.menuFlText} >Follow: 1000</Text>
+                        <Text style={styles.menuFlText}>Follow: 1000</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.menu}>
-
-                    <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('ProfileScreen')}>
-                        <Text style={styles.menuText}>Thông tin cá nhân</Text>
-                    </TouchableOpacity>
 
                     <TouchableOpacity
                         style={styles.menuItem}
@@ -288,6 +288,12 @@ const ProfileUser = ({ navigation, route }) => {
                         <Text style={styles.menuText}>Nhắn tin</Text>
                     </TouchableOpacity>
 
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={handleViewProducts}
+                    >
+                        <Text style={styles.menuText}>Sản phẩm</Text>
+                    </TouchableOpacity>
                 </View>
 
             </View>
