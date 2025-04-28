@@ -9,31 +9,34 @@ import storage from '@react-native-firebase/storage';
 const UpAv = (props) => {
     const [av, setAv] = useState('');
 
-    const Avatar = async userId => {
-        firestore()
-            .collection('Users')
-            .doc(userId)
-            .get()
-            .then(documentSnapshot => {
-                if (documentSnapshot.exists) {
-                    setAv(documentSnapshot.data().pic);
+    useEffect(() => {
+        const Avatar = async () => {
+            try {
+                const userId = props.cons;
+                const docSnapshot = await firestore()
+                    .collection('Users')
+                    .doc(userId)
+                    .get();
+
+                if (docSnapshot.exists) {
+                    setAv(docSnapshot.data().pic);
                 }
+            } catch (error) {
+                console.error('Error fetching user avatar:', error);
+            }
+        };
 
-            });
-    }
-
-    let userId = props.cons;
-    Avatar(userId);
+        Avatar();
+    }, [props.cons]);
 
     return (
-        av != '' ? (
+        av ? (
             <Image
                 source={{ uri: av }}
                 style={{
                     width: 40,
                     height: 40,
                     borderRadius: 20,
-                    // marginLeft: 10,
                 }}
             />
         ) : (
@@ -47,7 +50,7 @@ const UpAv = (props) => {
                 }}
             />
         )
-    )
+    );
 }
 
 export default UpAv;

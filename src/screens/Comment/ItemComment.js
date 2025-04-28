@@ -9,7 +9,7 @@ import UpAv from './UpAv';
 
 const ItemComment = ({ item, navigation }) => {
     const [currentUserId, setCurrentUserId] = useState(null);
-
+    console.log(item, 123)
     useEffect(() => {
         getCurrentUserId();
     }, []);

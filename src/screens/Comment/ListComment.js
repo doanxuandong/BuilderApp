@@ -45,7 +45,7 @@ const ListComment = ({ route, navigation }) => {
         const postRef = firestore().collection('Cmt').doc(idPost);
         const docSnapshot = await postRef.get();
         const commentObj = {
-            idUser: userId,
+            userId: userId,
             text: textCmt,
             createdAt: new Date()
         };
@@ -92,8 +92,6 @@ const ListComment = ({ route, navigation }) => {
                 </TouchableOpacity>
                 <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
                     Bình luận
-
-                    {idPost}
                 </Text>
                 <View style={{ width: 50, height: 50 }} />
             </View>
