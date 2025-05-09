@@ -9,7 +9,7 @@ import uuid from 'react-native-uuid'
 const Login = ({ navigation }) => {
 
 
-  const [email, setEmail] = useState('0973281001');
+  const [email, setEmail] = useState('0855708546');
   const [password, setPassword] = useState('1');
   const [reportReason, setReportReason] = useState('');
   const [showReportModal, setShowReportModal] = useState(false);
