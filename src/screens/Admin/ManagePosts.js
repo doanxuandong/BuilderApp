@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, Image, Modal, ScrollView } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
+import GetName from '../Component/Home/GetName';
 
 const ManagePosts = () => {
     const [posts, setPosts] = useState([]);
@@ -8,6 +9,7 @@ const ManagePosts = () => {
     const [reportModalVisible, setReportModalVisible] = useState(false);
     const [selectedPost, setSelectedPost] = useState(null);
     const [reports, setReports] = useState([]);
+    const [reportCounts, setReportCounts] = useState({});
 
     useEffect(() => {
         fetchAllPosts();
@@ -26,6 +28,19 @@ const ManagePosts = () => {
                 });
             });
             setPosts(allPosts);
+
+            // Đếm số lần bị báo cáo cho từng bài viết
+            const counts = {};
+            await Promise.all(
+                allPosts.map(async (post) => {
+                    const snap = await firestore()
+                        .collection('PostReports')
+                        .where('idPost', '==', post.idPost)
+                        .get();
+                    counts[post.idPost] = snap.size;
+                })
+            );
+            setReportCounts(counts);
         } catch (e) {
             console.log('Error fetchAllPosts', e);
         }
@@ -64,7 +79,10 @@ const ManagePosts = () => {
                     {item.img && typeof item.img === 'string' && item.img.trim() !== '' ? (
                         <Image source={{ uri: item.img }} style={styles.postImage} />
                     ) : null}
-                    <Text style={styles.info}>Tác giả: {item.userId}</Text>
+                    <Text style={styles.info}>
+                        Tác giả: <GetName userId={item.userId} />
+                        {` | Số lần bị báo cáo: ${reportCounts[item.idPost] || 0}`}
+                    </Text>
                     <Text style={styles.info}>Ngày đăng: {item.time ? new Date(item.time.toDate ? item.time.toDate() : item.time).toLocaleString() : 'Không rõ'}</Text>
                 </View>
                 <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.userId, item.idPost)}>

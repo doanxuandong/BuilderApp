@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
 
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -11,6 +11,8 @@ const Login = ({ navigation }) => {
 
   const [email, setEmail] = useState('0973281001');
   const [password, setPassword] = useState('1');
+  const [reportReason, setReportReason] = useState('');
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const handleLogin = async () => {
     // if (email === 'example@example.com' && password === 'password') {
@@ -48,6 +50,15 @@ const Login = ({ navigation }) => {
 
   const Loging = async (idUser, userType) => {
     await AsyncStorage.setItem('USERID', idUser);
+
+    // Kiểm tra report trước khi chuyển trang
+    const reasons = await checkUserReports(idUser);
+    if (reasons.length > 0) {
+      setReportReason(reasons.join('\n'));
+      setShowReportModal(true);
+      return;
+    }
+
     if (userType === '0' || userType === 0) {
       navigation.navigate('AdminDashboard');
     } else {
@@ -63,6 +74,36 @@ const Login = ({ navigation }) => {
   const handleRegister = () => {
     // Xử lý logic khi người dùng nhấn vào đăng ký ở đây
     navigation.navigate('Register')
+  };
+
+  const checkUserReports = async (userId) => {
+    let reasons = [];
+
+    // Kiểm tra PostReports
+    const postReports = await firestore()
+      .collection('PostReports')
+      .where('userId', '==', userId)
+      .get();
+
+    postReports.forEach(doc => {
+      if (doc.data().reason) {
+        reasons.push(doc.data().reason);
+      }
+    });
+
+    // Kiểm tra ReportsChat
+    const chatReports = await firestore()
+      .collection('ReportsChat')
+      .where('userId', '==', userId)
+      .get();
+
+    chatReports.forEach(doc => {
+      if (doc.data().reason) {
+        reasons.push(doc.data().reason);
+      }
+    });
+
+    return reasons;
   };
 
   return (
@@ -93,6 +134,45 @@ const Login = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Đăng nhập</Text>
       </TouchableOpacity>
+      <Modal
+        visible={showReportModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => {
+          setShowReportModal(false);
+          navigation.navigate('HomeScreen');
+        }}
+      >
+        <View style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(0,0,0,0.5)'
+        }}>
+          <View style={{
+            backgroundColor: 'white',
+            padding: 20,
+            borderRadius: 10,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>Tài khoản của bạn đã bị report</Text>
+            <Text style={{ marginBottom: 20 }}>{reportReason}</Text>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#c65128',
+                padding: 10,
+                borderRadius: 5
+              }}
+              onPress={() => {
+                setShowReportModal(false);
+                navigation.navigate('HomeScreen');
+              }}
+            >
+              <Text style={{ color: 'white' }}>Tiếp tục</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
