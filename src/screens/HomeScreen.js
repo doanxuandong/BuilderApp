@@ -12,6 +12,8 @@ import UpAv from './Comment/UpAv';
 
 const HomeScreen = ({ navigation }) => {
   const [list, setList] = useState([]);
+  const [searchText, setSearchText] = useState('');
+  const [filteredList, setFilteredList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState('');
@@ -68,6 +70,7 @@ const HomeScreen = ({ navigation }) => {
             });
 
             setList(posts);
+            setFilteredList(posts);
             setLoading(false);
           } catch (error) {
             console.error('Error processing posts:', error);
@@ -176,6 +179,19 @@ const HomeScreen = ({ navigation }) => {
         console.error('Error sending report:', error);
         alert('Có lỗi xảy ra khi gửi report');
       }
+    }
+  };
+
+  // Hàm tìm kiếm bài viết
+  const handleSearch = (text) => {
+    setSearchText(text);
+    if (text.trim() === '') {
+      setFilteredList(list);
+    } else {
+      const filtered = list.filter(post =>
+        post.text.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredList(filtered);
     }
   };
 
@@ -307,6 +323,8 @@ const HomeScreen = ({ navigation }) => {
           style={styles.searchInput}
           placeholder="Tìm kiếm..."
           placeholderTextColor="#666"
+          value={searchText}
+          onChangeText={handleSearch}
         />
         <TouchableOpacity style={styles.addButton}>
           <Icon name="search" size={32} color="#c65128" />
@@ -317,7 +335,7 @@ const HomeScreen = ({ navigation }) => {
 
       <View style={styles.feedContainer}>
         <FlatList
-          data={list}
+          data={filteredList}
           renderItem={renderItem}
           keyExtractor={(item, index) => `post-${index}`}
           showsVerticalScrollIndicator={false}
